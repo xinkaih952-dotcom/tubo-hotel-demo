@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>涂泊酒店收支利润 · 演示版</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ======================= 顶部标题栏 ======================= -->
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand">
+      <h1 class="brand-name"><span id="hotelName">涂泊酒店</span><small id="branchName">南宁东站店</small></h1>
+      <div class="brand-sub">收支利润 · 店长专用</div>
+    </div>
+    <div class="topbar-meta">
+      <span>今天 <b id="todayLabel">—</b></span>
+      <span>总客房数 <b><span id="totalRoomsLabel">68</span> 间</b></span>
+      <a href="index.html">前台营收台账 →</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="banner" id="storageBanner" hidden>
+    浏览器存储不可用（可能是无痕模式），本次录入的成本在关闭页面后会丢失。请换用普通窗口打开。
+  </div>
+
+  <!-- ======================= 月度经营概况 ======================= -->
+  <section aria-labelledby="overviewTitle">
+    <div class="section-label">
+      <h2 id="overviewTitle">月度经营概况</h2>
+      <div class="filter">
+        <label for="monthSelect">查看月份</label>
+        <select class="input" id="monthSelect"></select>
+      </div>
+    </div>
+    <div class="banner info" id="partialBanner" hidden></div>
+    <div class="stats" style="margin-top:12px">
+      <div class="stat is-key">
+        <div class="stat-label">总营收</div>
+        <div class="stat-value" id="kRevenue">—</div>
+        <div class="stat-foot" id="kRevenueFoot">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">总成本费用</div>
+        <div class="stat-value" id="kCost">—</div>
+        <div class="stat-foot" id="kCostFoot">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">净利润</div>
+        <div class="stat-value" id="kNet">—</div>
+        <div class="stat-foot" id="kNetFoot">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">毛利率</div>
+        <div class="stat-value" id="kGross">—</div>
+        <div class="stat-foot" id="kGrossFoot">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">净利率</div>
+        <div class="stat-value" id="kNetMargin">—</div>
+        <div class="stat-foot" id="kNetMarginFoot">—</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 成本结构 + 利润趋势 ======================= -->
+  <div class="fin-grid">
+    <section class="panel" aria-labelledby="pieTitle">
+      <div class="panel-head">
+        <h2 class="panel-title" id="pieTitle">成本结构</h2>
+        <div class="seg" id="pieScope" role="group" aria-label="统计范围">
+          <button type="button" data-scope="month" aria-pressed="true">本月</button>
+          <button type="button" data-scope="ytd" aria-pressed="false">本年累计</button>
+        </div>
+      </div>
+      <div class="donut-layout">
+        <div class="chart-wrap" id="pieWrap">
+          <svg id="pieChart" role="img" aria-labelledby="pieTitle"></svg>
+          <div class="chart-tip" id="pieTip" hidden></div>
+        </div>
+        <table class="cost-legend" id="pieLegend"></table>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="profitTitle">
+      <div class="panel-head">
+        <h2 class="panel-title" id="profitTitle">月度利润趋势</h2>
+        <span class="src">点击柱子切换查看月份</span>
+      </div>
+      <div class="chart-legend">
+        <span><i class="box" style="background:var(--profit-pos)"></i>盈利</span>
+        <span><i class="box" style="background:var(--profit-neg)"></i>亏损</span>
+      </div>
+      <div class="chart-wrap" id="barWrap">
+        <svg id="barChart" role="img" aria-labelledby="profitTitle"></svg>
+        <div class="chart-tip" id="barTip" hidden></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ======================= 月度汇总表 ======================= -->
+  <section class="panel" aria-labelledby="sumTitle">
+    <div class="panel-head">
+      <h2 class="panel-title" id="sumTitle">月度收支汇总</h2>
+      <button type="button" class="btn btn-sm" id="btnExportSummary">导出汇总 Excel</button>
+    </div>
+    <div class="table-scroll">
+      <table class="grid-table monthly" id="summaryTable"></table>
+    </div>
+  </section>
+
+  <!-- ======================= 成本录入 + 利润表 ======================= -->
+  <div class="columns">
+    <section class="panel" aria-labelledby="costTitle">
+      <div class="panel-head">
+        <h2 class="panel-title" id="costTitle">月度成本录入</h2>
+        <span class="src" id="costSource"></span>
+      </div>
+      <div class="panel-body">
+        <form id="costForm" class="form-grid cost-form" novalidate>
+          <div class="field-row">
+            <div class="field">
+              <label for="cMonth">成本月份</label>
+              <input class="input" type="month" id="cMonth">
+            </div>
+            <div class="field" style="justify-content:flex-end">
+              <button type="button" class="btn" id="btnCopyPrev">复制上月数据</button>
+            </div>
+          </div>
+          <div id="costGroups" class="form-grid"></div>
+          <div class="live-total">
+            <div class="row total"><span>本月成本费用合计</span><b id="costTotal">¥0.00</b></div>
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn btn-primary btn-block" id="btnCostSave">保存成本</button>
+            <button type="button" class="btn-link" id="btnRestore" hidden>恢复为利润表原数</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="stmtTitle">
+      <div class="panel-head">
+        <h2 class="panel-title" id="stmtTitle">月度利润表</h2>
+        <button type="button" class="btn btn-sm" id="btnExportStmt">导出利润表 Excel</button>
+      </div>
+      <div class="table-scroll">
+        <table class="statement" id="statement"></table>
+      </div>
+      <div class="panel-foot">每间夜成本 = 金额 ÷ 当月入住间夜。毛利 = 总营收 − 主营业务成本 − 非主营业务成本；毛利率 = 毛利 ÷ 总营收。</div>
+    </section>
+  </div>
+
+  <!-- ======================= 数据来源 ======================= -->
+  <section class="panel footer-panel" aria-labelledby="srcTitle">
+    <div class="panel-head"><h2 class="panel-title" id="srcTitle">营收数据来源</h2></div>
+    <div class="panel-body">
+      <div class="export-box">
+        <label class="btn btn-primary" for="importFile">导入前台 Excel</label>
+        <input type="file" id="importFile" accept=".xlsx,.xls" multiple hidden>
+        <button type="button" class="btn-link" id="btnClearImport">清除已导入的数据</button>
+      </div>
+      <div>
+        <ul class="notes">
+          <li>演示版：历史月份的营收和成本按当前日期自动生成，全部为虚构数字。</li>
+          <li>之后的月份：营收来自前台每日台账。如果本页和前台页在<b>同一台电脑、同一个浏览器</b>打开，会自动读取；否则请让前台导出当月 Excel，在这里点「导入前台 Excel」。</li>
+          <li>成本每月录入一次，保存在<b>这台电脑的浏览器</b>里。可以点「导出汇总 Excel」备份。</li>
+        </ul>
+        <p class="field-help" style="margin-top:10px" id="importInfo"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- 演示数据（全部虚构，按当前日期自动生成） -->
+<script src="demo-data.js"></script>
+<script src="common.js"></script>
+<!-- 演示模式：独立存储、自动填入示例记录、顶部提示 -->
+<script src="demo.js"></script>
+<script src="finance.js"></script>
+</body>
+</html>
